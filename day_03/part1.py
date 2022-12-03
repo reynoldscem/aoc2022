@@ -18,11 +18,13 @@ def priority(character):
     else:
         return ord(character) - 64 + 26
 
+
 def common_item(string):
     midpoint = len(string) // 2
     intersection = set(string[:midpoint]).intersection(string[midpoint:])
 
     return intersection.pop()
+
 
 def main():
     args = build_parser().parse_args()
@@ -31,6 +33,7 @@ def main():
         lines = fd.read().splitlines()
 
     print(sum(priority(common_item(line)) for line in lines))
+
 
 if __name__ == '__main__':
     main()
