@@ -44,8 +44,23 @@ def main():
         string.split('\n')
         for string in data.split('\n\n')
     ]
+    # Remove the last one to prevent a blank instruction.
+    #  Don't do via stripping input data as it's important
+    #  that the crates string is square.
+    procedure_lines = procedure_lines[:-1]
     crates = make_crates(starting_crates_lines)
-    crates
+
+    for line in procedure_lines:
+        count, source, dest = map(int, re.findall(r'\d+', line))
+
+        for _ in range(count):
+            crates[dest].append(crates[source].pop())
+
+    answer = ''.join([
+        crates[key].pop()
+        for key in sorted(crates.keys())
+    ])
+    print(answer)
 
 
 if __name__ == '__main__':
