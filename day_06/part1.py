@@ -3,9 +3,6 @@ from itertools import islice
 from pathlib import Path
 
 
-WINDOW_SIZE = 4
-
-
 # https://docs.python.org/release/2.3.5/lib/itertools-example.html
 def window(seq, n=2):
     "Returns a sliding window (of width n) over data from the iterable"
@@ -26,18 +23,24 @@ def build_parser():
         required=True
     )
 
+    parser.add_argument(
+        '--window-size', type=int, default=4
+    )
+
     return parser
 
 
 def main():
     args = build_parser().parse_args()
 
+    window_size = args.window_size
+
     with open(args.input_filename) as fd:
         data = fd.read().strip()
 
-    for index, substring in enumerate(window(data, WINDOW_SIZE)):
+    for index, substring in enumerate(window(data, window_size)):
         if len(substring) == len(set(substring)):
-            print(index + WINDOW_SIZE)
+            print(index + window_size)
             break
 
 
