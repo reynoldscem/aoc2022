@@ -34,15 +34,15 @@ def vector_sub(first, second):
     )
 
 
-def manhattan(first, second):
-    return (
-        abs(first[0] - second[0]) +
+def distance_metric(first, second):
+    return max(
+        abs(first[0] - second[0]),
         abs(first[1] - second[1])
     )
 
 
 def touching(first, second):
-    return manhattan(first, second) < 2
+    return distance_metric(first, second) < 2
 
 
 def colinear(first, second):
@@ -56,8 +56,8 @@ def diagonal(first, second):
 def get_direction(vector):
     from math import copysign
     return (
-        int(copysign(1, vector[0])),
-        int(copysign(1, vector[1]))
+        (vector[0] != 0) * int(copysign(1, vector[0])),
+        (vector[1] != 0) * int(copysign(1, vector[1]))
     )
 
 
@@ -73,31 +73,18 @@ def simulate_updates(head_changes):
 
     for change in head_changes:
         head = vector_add(head, change)
+        difference = vector_sub(head, tail)
 
-        if change == (0, 0):
-            pass
-        elif touching(head, tail):
-            # print(manhattan(head, tail))
-            # print("No change")
-            # print(f'Head: {head}, Tail: {tail}')
-            # print()
-            continue
-        elif colinear(head, tail):
-            print('Colinear drag')
-            tail = vector_add(tail, change)
-        elif manhattan(head, tail) >= 2:
+        if distance_metric(head, tail) > 1:
             difference = vector_sub(head, tail)
             change = get_direction(difference)
-            # print(manhattan(head, tail))
-            # print(f'    {difference}')
             tail = vector_add(tail, change)
         else:
             change = (0, 0)
-            # print('Diagonal?')
 
         tail_changes.append(change)
 
-        print(f'Head: {head}, Tail: {tail}')
+        # print(f'Head: {head}, Tail: {tail}')
         # print()
 
         tail_positions.add(tail)
@@ -125,15 +112,11 @@ def main():
     ]
 
     tail_changes = head_changes
-    for _ in range(10):
-        print(f'n_instructions: {len(tail_changes)}')
+    for _ in range(9):
         tail_changes, tail_positions = simulate_updates(
             tail_changes
         )
-        print(tail_changes)
-        print(f'n_instructions: {len(tail_changes)}')
-        print(len(tail_positions))
-        print(tail_positions)
+    print(len(tail_positions))
 
 
 if __name__ == '__main__':
