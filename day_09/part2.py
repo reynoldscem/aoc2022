@@ -73,24 +73,26 @@ def simulate_updates(head_changes):
 
     for change in head_changes:
         head = vector_add(head, change)
-        if touching(head, tail):
+
+        if change == (0, 0):
+            pass
+        elif touching(head, tail):
             # print(manhattan(head, tail))
             # print("No change")
             # print(f'Head: {head}, Tail: {tail}')
             # print()
             continue
-
-        if colinear(head, tail):
+        elif colinear(head, tail):
             print('Colinear drag')
             tail = vector_add(tail, change)
-        elif manhattan(head, tail) > 2:
+        elif manhattan(head, tail) >= 2:
             difference = vector_sub(head, tail)
             change = get_direction(difference)
             # print(manhattan(head, tail))
             # print(f'    {difference}')
             tail = vector_add(tail, change)
         else:
-            pass
+            change = (0, 0)
             # print('Diagonal?')
 
         tail_changes.append(change)
@@ -123,7 +125,7 @@ def main():
     ]
 
     tail_changes = head_changes
-    for _ in range(9):
+    for _ in range(10):
         print(f'n_instructions: {len(tail_changes)}')
         tail_changes, tail_positions = simulate_updates(
             tail_changes
