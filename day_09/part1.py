@@ -80,39 +80,23 @@ def main():
 
     tail_positions = set()
     tail_positions.add(tail)
-    print(tail)
 
     for instruction in instructions:
-        print(instruction)
         change = directions[instruction]
         head = vector_add(head, change)
         if touching(head, tail):
-            print(manhattan(head, tail))
-            print("No change")
-            print(f'Head: {head}, Tail: {tail}')
-            print()
             continue
 
         if colinear(head, tail):
-            print('Colinear drag')
             tail = vector_add(tail, change)
         elif manhattan(head, tail) > 2:
             difference = vector_sub(head, tail)
             update = get_direction(difference)
-            print(manhattan(head, tail))
-            print(f'    {difference}')
             tail = vector_add(tail, update)
-        else:
-            print('Diagonal?')
-        # tail = prev_head
-        print(f'Head: {head}, Tail: {tail}')
-        print()
 
         tail_positions.add(tail)
 
     print(len(tail_positions))
-    import IPython
-    IPython.embed()
 
 
 if __name__ == '__main__':
