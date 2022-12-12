@@ -12,10 +12,6 @@ def build_parser():
     return parser
 
 
-def character_to_elevation(character):
-    return ord(character) - ord('a')
-
-
 class HeightGrid:
     def __init__(self, height_grid, start_coordinate, end_coordinate):
 
@@ -27,6 +23,10 @@ class HeightGrid:
         self.n_rows, self.n_columns = self.row_and_column_count(height_grid)
         for row in height_grid:
             assert len(row) == self.n_columns, 'Must be square array!'
+
+    @staticmethod
+    def character_to_elevation(character):
+        return ord(character) - ord('a')
 
     @staticmethod
     def row_and_column_count(grid):
@@ -71,7 +71,7 @@ class HeightGrid:
     def make_from_input_string(cls, string):
         height_map_string = string.replace('S', 'a').replace('E', 'z')
         height_grid = [
-            [character_to_elevation(character) for character in line]
+            [cls.character_to_elevation(character) for character in line]
             for line in height_map_string.split('\n')
         ]
         n_rows, n_columns = cls.row_and_column_count(height_grid)
