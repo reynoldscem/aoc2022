@@ -83,12 +83,75 @@ class HeightGrid:
             if self.valid(candidate_neighbour):
                 yield candidate_neighbour
 
+    @staticmethod
+    def manhattan(coordinate, other):
+        x, y = coordinate
+        other_x, other_y = other
+
+        return abs(x - other_x) + abs(y - other_y)
+
     def reachable_neighbours(self, coordinate):
         this_height = self[coordinate]
         for possible_neighbour in self.possible_neighbours(coordinate):
             neighbour_height = self[possible_neighbour]
-            if abs(neighbour_height - this_height) <= 1:
+            if neighbour_height <= this_height + 1:
                 yield possible_neighbour
+
+    def trace_path(self, preceding_node, current):
+        path = []
+        while current in preceding_node:
+            current = preceding_node[current]
+            path.insert(0, current)
+
+        return path
+
+    def a_star_search(self):
+        from collections import defaultdict
+        from math import inf
+
+        start_coordinate = self.start_coordinate
+        target_coordinate = self.end_coordinate
+
+        def heuristic(coordinate):
+            return self.manhattan(coordinate, target_coordinate)
+
+        preceding_lookup = dict()
+
+        # shortest_path_cost_from_start_to_coordinate
+        cost_to_coordinate = defaultdict(lambda: inf)
+        cost_to_coordinate[start_coordinate] = 0
+
+        # Only a true upper bound if the heuristic is admissible (it is)
+        upper_bound_cost_to_coordinate = defaultdict(lambda: inf)
+        upper_bound_cost_to_coordinate[start_coordinate] = (
+            self.manhattan(start_coordinate, target_coordinate)
+        )
+
+        frontier = set()
+        frontier.add(start_coordinate)
+
+        while frontier:
+            current = min(
+                frontier, key=lambda x: upper_bound_cost_to_coordinate[x]
+            )
+            if current == target_coordinate:
+                return self.trace_path(preceding_lookup, current)
+
+            frontier.remove(current)
+
+            for neighbour in self.reachable_neighbours(current):
+                potential_score = 1 + cost_to_coordinate[current]
+                if potential_score < cost_to_coordinate[neighbour]:
+                    preceding_lookup[neighbour] = current
+
+                    cost_to_coordinate[neighbour] = potential_score
+                    upper_bound_cost_to_coordinate[neighbour] = (
+                        potential_score + heuristic(neighbour)
+                    )
+                    if neighbour not in frontier:
+                        frontier.add(neighbour)
+
+        raise Exception("Couldn't find item!")
 
     @staticmethod
     def flatten(matrix):
@@ -132,12 +195,14 @@ class HeightGrid:
 
         return cls(height_grid, start_index_2d, end_index_2d)
 
-    def __str__(self):
-        grid_string = '\n\n'.join(
+    @property
+    def grid_string(self):
+        return '\n\n'.join(
             ' '.join(map(lambda x: f'{x:03d}', line))
             for line in self.height_grid
         )
 
+    def __str__(self):
         start_coordinate_string = f'Start: {self.start_coordinate}'
         end_coordinate_string = f'End: {self.end_coordinate}'
 
@@ -145,7 +210,7 @@ class HeightGrid:
             start_coordinate_string,
             end_coordinate_string,
             '\n',
-            grid_string
+            self.grid_string
         ])
 
 
@@ -157,12 +222,16 @@ def main():
 
     height_grid = HeightGrid.make_from_input_string(data)
 
-    list(height_grid.possible_neighbours(height_grid.start_coordinate))
-
-    import IPython
-    IPython.embed()
-
-    print(height_grid)
+    path = height_grid.a_star_search()
+    visited_visualisation = '\n'.join(
+        ''.join(
+            '#' if coordinate in path else '.'
+            for coordinate in row
+        )
+        for row in height_grid.indices_2d
+    )
+    print(visited_visualisation)
+    print(len(path))
 
 
 if __name__ == '__main__':
