@@ -1,3 +1,4 @@
+from functools import cached_property
 from argparse import ArgumentParser
 from pathlib import Path
 
@@ -24,6 +25,10 @@ class HeightGrid:
         for row in height_grid:
             assert len(row) == self.n_columns, 'Must be square array!'
 
+    def __getitem__(self, key):
+        x, y = key
+        return self.height_grid[x][y]
+
     @staticmethod
     def character_to_elevation(character):
         return ord(character) - ord('a')
@@ -36,7 +41,7 @@ class HeightGrid:
         return rows, columns
 
     @staticmethod
-    def indices_2d(n_rows, n_columns):
+    def _indices_2d(n_rows, n_columns):
         return [
             [
                 (row_index, column_index)
@@ -44,6 +49,46 @@ class HeightGrid:
             ]
             for row_index in range(n_rows)
         ]
+
+    @cached_property
+    def indices_2d(self):
+        return self._indices_2d(self.n_rows, self.n_columns)
+
+    @cached_property
+    def coordinate_set(self):
+        return set(
+            self.flatten(self.indices_2d)
+        )
+
+    def valid(self, coordinate):
+        return coordinate in self.coordinate_set
+
+    def possible_neighbours(self, coordinate):
+        # If we end up needing 8-neighbours...
+        #
+        # from itertools import product
+        # deltas = (-1, 0, 1)
+        # offsets = set(product(deltas, deltas)) - {(0, 0)}
+
+        offsets = (
+            (0, -1),
+            (0, 1),
+            (-1, 0),
+            (1, 0)
+        )
+
+        x, y = coordinate
+        for dx, dy in offsets:
+            candidate_neighbour = (x + dx, y + dy)
+            if self.valid(candidate_neighbour):
+                yield candidate_neighbour
+
+    def reachable_neighbours(self, coordinate):
+        this_height = self[coordinate]
+        for possible_neighbour in self.possible_neighbours(coordinate):
+            neighbour_height = self[possible_neighbour]
+            if abs(neighbour_height - this_height) <= 1:
+                yield possible_neighbour
 
     @staticmethod
     def flatten(matrix):
@@ -75,7 +120,7 @@ class HeightGrid:
             for line in height_map_string.split('\n')
         ]
         n_rows, n_columns = cls.row_and_column_count(height_grid)
-        indices = cls.indices_2d(n_rows, n_columns)
+        indices = cls._indices_2d(n_rows, n_columns)
         indices_flat = cls.flatten(indices)
 
         (
@@ -111,6 +156,11 @@ def main():
         data = fd.read().strip()
 
     height_grid = HeightGrid.make_from_input_string(data)
+
+    list(height_grid.possible_neighbours(height_grid.start_coordinate))
+
+    import IPython
+    IPython.embed()
 
     print(height_grid)
 
