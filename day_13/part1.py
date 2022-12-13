@@ -110,15 +110,6 @@ def main():
 
     print(sum(indices_of_pairs_in_order))
 
-    # for index, (first, second) in pairs_with_indices:
-    #     print(f'== Pair {index} ==')
-    #     try:
-    #         ordered(first, second)
-    #     except Exception as e:
-    #         print('This case failed')
-    #         print(e)
-    #         print()
-
 
 if __name__ == '__main__':
     main()
