@@ -29,34 +29,44 @@ def parse_string_to_pair(string):
     )
 
 
+def ordered(left, right):
+    return compare(left, right, level=0) == Comparison.LESSER
+
+
 def compare(left, right, level=0):
+    if isinstance(left, int) and isinstance(right, int):
+        print('  ' * level, end='')
+        print(f'- Compare {left} vs {right}')
+        if left == right:
+            return Comparison.EQUAL
+        elif left < right:
+            print('  ' * (level + 1), end='')
+            print('- Left side is smaller, so inputs are in the right order')
+            return Comparison.LESSER
+        elif left > right:
+            print('  ' * (level + 1), end='')
+            print(
+                '- Right side is smaller, '
+                'so inputs are not in the right order'
+            )
+            return Comparison.GREATER
 
-    print('  ' * level, end='')
-    print(f'- Compare {left} vs {right}')
-    if left == right:
-        return Comparison.EQUAL
-    elif left < right:
-        print('  ' * (level + 1), end='')
-        print('- Left side is smaller, so input are in the right order')
-        return Comparison.LESSER
-    elif left > right:
-        print('  ' * (level + 1), end='')
+    if isinstance(left, list) and isinstance(right, int):
+        print('  ' * (level), end='')
         print(
-            '- Right side is smaller, '
-            'so inputs are not in the right order'
+            f'- Mixed types; convert right to [{right}] and retry comparison'
         )
-        return Comparison.GREATER
+        right = [right]
+    elif isinstance(left, int) and isinstance(right, list):
+        print('  ' * (level), end='')
+        print(
+            f'- Mixed types; convert left to [{left}] and retry comparison'
+        )
+        left = [left]
 
-
-def all_ordered(left, right):
-    return ordered(left, right, level=0) == Comparison.LESSER
-
-
-def ordered(left, right, level=0):
     print(f'- Compare {left} vs {right}')
     for a, b in zip(left, right):
         comparison = compare(a, b, level=level + 1)
-        print(comparison)
         if comparison == Comparison.EQUAL:
             pass
         elif comparison in (Comparison.LESSER, Comparison.GREATER):
@@ -65,25 +75,20 @@ def ordered(left, right, level=0):
             raise RuntimeError("Invalid comparison")
 
     if len(left) < len(right):
+        print('  ' * level, end='')
+        print(
+            '- Left side ran out of items, so inputs are in the right order'
+        )
         return Comparison.LESSER
     elif len(left) == len(right):
         return Comparison.EQUAL
     else:
+        print('  ' * level, end='')
+        print(
+            '- Right side ran out of items, '
+            'so inputs are not in the right order'
+        )
         return Comparison.GREATER
-
-    # if isinstance(left, int) and isinstance(right, int):
-    #     return left < right
-
-    # if isinstance(left, list) and isinstance(right, list):
-    #     is_ordered = True
-    #     while True:
-    #         if len(left) == 0:
-    #             return is_ordered
-    #         elif len(right) == 0:
-    #             return False
-
-    #         left_element = left.pop(0)
-    #         right_element = right.pop(0)
 
 
 def main():
@@ -97,23 +102,22 @@ def main():
 
     pairs_with_indices = list(zip(count(1), pairs))
 
-    # indices_of_pairs_in_order = [
-    #     index
-    #     for index, (first, second) in pairs_with_indices
-    #     if ordered(first, second)
-    # ]
+    indices_of_pairs_in_order = [
+        index
+        for index, (first, second) in pairs_with_indices
+        if ordered(first, second)
+    ]
 
-    # print(sum(indices_of_pairs_in_order))
+    print(sum(indices_of_pairs_in_order))
 
-    pairs_with_indices
-    for index, (first, second) in pairs_with_indices:
-        print(f'== Pair {index} ==')
-        try:
-            all_ordered(first, second)
-        except Exception as e:
-            print('This case failed')
-            print(e)
-            print()
+    # for index, (first, second) in pairs_with_indices:
+    #     print(f'== Pair {index} ==')
+    #     try:
+    #         ordered(first, second)
+    #     except Exception as e:
+    #         print('This case failed')
+    #         print(e)
+    #         print()
 
 
 if __name__ == '__main__':
