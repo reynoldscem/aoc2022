@@ -36,11 +36,11 @@ def compare(left, right, level=0):
     if left == right:
         return Comparison.EQUAL
     elif left < right:
-        print('  ' * level, end='')
+        print('  ' * (level + 1), end='')
         print('- Left side is smaller, so input are in the right order')
         return Comparison.LESSER
     elif left > right:
-        print('  ' * level, end='')
+        print('  ' * (level + 1), end='')
         print(
             '- Right side is smaller, '
             'so inputs are not in the right order'
@@ -48,20 +48,28 @@ def compare(left, right, level=0):
         return Comparison.GREATER
 
 
+def all_ordered(left, right):
+    return ordered(left, right, level=0) == Comparison.LESSER
+
+
 def ordered(left, right, level=0):
     print(f'- Compare {left} vs {right}')
     for a, b in zip(left, right):
         comparison = compare(a, b, level=level + 1)
+        print(comparison)
         if comparison == Comparison.EQUAL:
             pass
-        elif comparison == Comparison.LESSER:
-            return True
-        elif comparison == Comparison.GREATER:
-            return False
+        elif comparison in (Comparison.LESSER, Comparison.GREATER):
+            return comparison
         else:
             raise RuntimeError("Invalid comparison")
 
-    return len(left) > len(right)
+    if len(left) < len(right):
+        return Comparison.LESSER
+    elif len(left) == len(right):
+        return Comparison.EQUAL
+    else:
+        return Comparison.GREATER
 
     # if isinstance(left, int) and isinstance(right, int):
     #     return left < right
@@ -101,7 +109,7 @@ def main():
     for index, (first, second) in pairs_with_indices:
         print(f'== Pair {index} ==')
         try:
-            ordered(first, second)
+            all_ordered(first, second)
         except Exception as e:
             print('This case failed')
             print(e)
