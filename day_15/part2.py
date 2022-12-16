@@ -116,6 +116,17 @@ def parse_line(line):
     return tuple(map(int, findall(r'(-?\d+)', line)))
 
 
+def potential_beacon_locations(balls, bound):
+    for ball in balls:
+        for vector in ball.outside_boundary():
+            if vector.x < 0 or vector.y < 0:
+                continue
+            if vector.x > bound or vector.y > bound:
+                continue
+            if not any(vector in test_ball for test_ball in balls):
+                yield vector
+
+
 def main():
     args = build_parser().parse_args()
 
@@ -136,24 +147,11 @@ def main():
         for first, second in vector_pairs
     ]
 
-    bound = 20
     bound = 4000000
-    found = False
-    for ball in balls:
-        if found:
-            break
-        for vector in ball.outside_boundary():
-            if vector.x < 0 or vector.y < 0:
-                continue
-            if vector.x > bound or vector.y > bound:
-                continue
-            if not any(vector in test_ball for test_ball in balls):
-                print('Not in any ball:')
-                print(vector)
-                tuning_frequency = vector.x * 4000000 + vector.y
-                print(tuning_frequency)
-                found = True
-                break
+    beacon = next(potential_beacon_locations(balls, bound))
+    print(beacon)
+    tuning_frequency = beacon.x * bound + beacon.y
+    print(tuning_frequency)
 
 
 if __name__ == '__main__':
