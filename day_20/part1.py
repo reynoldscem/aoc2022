@@ -14,35 +14,26 @@ def build_parser():
 
 def mix(number_list):
     num_elements = len(number_list)
-    index_order = number_list.copy()
-
     indices = list(range(len(number_list)))
 
     for position in range(num_elements):
         source_position = indices.index(position)
-        value_to_move = number_list[source_position]
-        element = number_list.pop(source_position)
-        indices.pop(source_position)
+
+        value_to_move = number_list[position]
+
+        index_lookup = indices.pop(source_position)
+        assert index_lookup == position
 
         destination_position = (
             source_position + value_to_move
         ) % (num_elements - 1)
 
-        number_list = (
-            number_list[:destination_position] +
-            [value_to_move] +
-            number_list[destination_position:]
-        )
-        indices = (
-            indices[:destination_position] +
-            [destination_position] +
-            indices[destination_position:]
-        )
-        # print(f'{source_position}, {destination_position}')
-        # print(f'Move {element} to {destination_position}')
-        # print(number_list)
+        indices.insert(destination_position, position)
 
-    return number_list
+    return [
+        number_list[index]
+        for index in indices
+    ]
 
 
 def main():
@@ -54,7 +45,6 @@ def main():
             for entry in fd.read().strip().splitlines()
         ]
 
-    # print(input_numbers)
     mixed = mix(input_numbers)
 
     base_position = mixed.index(0)
@@ -63,7 +53,7 @@ def main():
         (base_position + offset) % len(mixed)
         for offset in offsets
     ]
-
+    print([mixed[index] for index in indices])
     print(
         sum(mixed[index] for index in indices)
     )
